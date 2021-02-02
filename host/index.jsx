@@ -1,4 +1,4 @@
-/** Copyright (C) 2020  Peter Gregory */
+/** Copyright (C) 2021  Peter Gregory */
 
 function getForegroundHSB() {
     var hsb = app.foregroundColor.hsb;
