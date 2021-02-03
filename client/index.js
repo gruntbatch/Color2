@@ -44,13 +44,22 @@ function cubeOnMouseUp(event) {
 }
 
 function ringOnMouseDown(event) {
+    mapRingMouseToHsb(event);
+    updateHSB(h, s, b);
+    window.addEventListener("mousemove", ringOnMouseMove);
     window.addEventListener("mouseup", ringOnMouseUp);
+}
+
+function ringOnMouseMove(event) {
+    mapRingMouseToHsb(event);
+    updateHSB(h, s, b);
 }
 
 function ringOnMouseUp(event) {
     mapRingMouseToHsb(event);
     updateHSB(h, s, b);
     setForegroundColor(h, s, b);
+    window.removeEventListener("mousemove", ringOnMouseMove);
     window.removeEventListener("mouseup", ringOnMouseUp);
 }
 
