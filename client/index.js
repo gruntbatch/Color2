@@ -15,14 +15,14 @@ register(eventSetd);
 register(eventRset);
 
 // Create client graphics
+createPanel();
 
 function photoshopEventCallback(event) {
-    // updatePanel();
+    updatePanel();
 }
 
 function onClickEventCallback(event) {
-    // dataset = event.currentTarget.dataset;
-    // setForegroundColor(dataset.h, dataset.s, dataset.b);
+    console.log(event);
 }
 
 function register(eventId) {
@@ -37,8 +37,22 @@ function setForegroundColor(h, s, b) {
 }
 
 function createPanel() {
-    createSaturation();
-    createPalette();
+    // createSaturation();
+    // createPalette();
+    updatePanel();
+}
+
+function updatePanel() {
+    csInterface.evalScript("getForegroundHSB()", function (result) {
+        var h, s, b;
+        [h, s, b] = JSON.parse(result);
+        updateHue(h);
+    });
+}
+
+function updateHue(h) {
+    var hue = document.querySelector("#hue");
+    hue.style.background = `hsl(${h}, 100%, 50%)`;
 }
 
 // https://stackoverflow.com/a/31851617

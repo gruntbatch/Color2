@@ -16,6 +16,10 @@
             height: 100vh;
         }
 
+        .pointer-events-none {
+            pointer-events: none;
+        }
+
         .float-left {
             float: left;
         }
@@ -124,7 +128,7 @@
             background: hsl(315, 100%, 50%);
         }
 
-        #background {
+        #hue {
             background: hsl(45, 100%, 50%);
         }
 
@@ -149,10 +153,10 @@
         </div>
         <div class="flex h-cube">
             <div class="w-cell" id="hue-135-225"></div>
-            <div class="w-cube relative">
-                <div class="absolute" id="background"></div>
-                <div class="absolute" id="saturation"></div>
-                <div class="absolute" id="value"></div>
+            <div class="w-cube relative" onclick="onClickEventCallback(event)">
+                <div class="absolute pointer-events-none" id="hue"></div>
+                <div class="absolute pointer-events-none" id="saturation"></div>
+                <div class="absolute pointer-events-none" id="value"></div>
             </div>
             <div class="w-cell" id="hue-315-45"></div>
         </div>
@@ -162,8 +166,8 @@
             <div class="w-cell" id="hue-315"></div>
         </div>
     </div>
-    <!-- <script type="text/javascript" src="CSInterface.js"></script> -->
-    <!-- <script type="text/javascript" src="index.js"></script> -->
+    <script type="text/javascript" src="CSInterface.js"></script>
+    <script type="text/javascript" src="index.js"></script>
 </body>
 
 </html>
