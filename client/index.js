@@ -18,6 +18,13 @@ var h = 0;
 var s = 100;
 var b = 100;
 
+// Update the panel, to initialize the h, s, b values
+updatePanel();
+
+function photoshopEventCallback(event) {
+    updatePanel();
+}
+
 var cube = document.querySelector("#cube");
 cube.addEventListener("mousedown", cubeOnMouseDown);
 
@@ -30,13 +37,7 @@ function cubeOnMouseDown(event) {
 }
 
 function cubeOnMouseUp(event) {
-    // Get normalized mouse coordinates
-    var [x, y] = normalizeMouseCoordinates(event.clientX, event.clientY, cube.getBoundingClientRect());
-    // Modify according to our specific needs
-    y = 1 - y;
-    // Update h, s, b
-    s = x * 100;
-    b = y * 100;
+    mapCubeMouseToHsb(event);
     updateHSB(h, s, b);
     setForegroundColor(h, s, b);
     window.removeEventListener("mouseup", cubeOnMouseUp);
@@ -47,26 +48,10 @@ function ringOnMouseDown(event) {
 }
 
 function ringOnMouseUp(event) {
-    // Get normalized mouse coordinates
-    var [x, y] = normalizeMouseCoordinates(event.clientX, event.clientY, cube.getBoundingClientRect());
-    // Modify according to our specific needs
-    x = 2 * x - 1;
-    y = 1 - 2 * y;
-    // Update h, s, b
-    h = Math.atan2(y, x) * (180 / Math.PI);
+    mapRingMouseToHsb(event);
     updateHSB(h, s, b);
     setForegroundColor(h, s, b);
     window.removeEventListener("mouseup", ringOnMouseUp);
-}
-
-createPanel();
-
-function photoshopEventCallback(event) {
-    updatePanel();
-}
-
-function onClickEventCallback(event) {
-    console.log(event);
 }
 
 function register(eventId) {
@@ -78,12 +63,6 @@ function register(eventId) {
 
 function setForegroundColor(h, s, b) {
     csInterface.evalScript(`setForegroundHSB(${h}, ${s}, ${b})`);
-}
-
-function createPanel() {
-    // createSaturation();
-    // createPalette();
-    updatePanel();
 }
 
 function updatePanel() {
@@ -98,10 +77,39 @@ function updateHSB(h, s, b) {
     hue.style.background = `hsl(${h}, 100%, 50%)`;
 }
 
-function normalizeMouseCoordinates(x, y, clientRect) {
+function mapCubeMouseToHsb(event) {
+    // Get normalized mouse coordinates
+    var [x, y] = normalizeMouseCoordinates(event.clientX, event.clientY, cube);
+    // Update h, s, b
+    [s, b] = nmc_to_sb(x, y);
+}
+
+function mapRingMouseToHsb(event) {
+    // Get normalized mouse coordinates
+    // Note, because the corners of the ring are single solid colors, it is
+    // more accurate to use the inner edge of the ring (the cube) to calculate
+    // client coordinates than the outer edge of the ring.
+    var [x, y] = normalizeMouseCoordinates(event.clientX, event.clientY, cube);
+    // Update h, s, b
+    h = nmc_to_h(x, y);
+}
+
+function normalizeMouseCoordinates(x, y, client) {
+    var clientRect = client.getBoundingClientRect();
     var mouseX = (x - clientRect.left) / clientRect.width;
     var mouseY = (y - clientRect.top) / clientRect.height;
     return [clamp(mouseX, 0, 1), clamp(mouseY, 0, 1)];
+}
+
+function nmc_to_sb(x, y) {
+    y = 1 - y;
+    return [x * 100, y * 100];
+}
+
+function nmc_to_h(x, y) {
+    x = 2 * x - 1;
+    y = 1 - 2 * y;
+    return Math.atan2(y, x) * (180 / Math.PI);
 }
 
 // https://stackoverflow.com/a/31851617
