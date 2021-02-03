@@ -14,7 +14,48 @@ register(eventExch);
 register(eventSetd);
 register(eventRset);
 
-// Create client graphics
+var h = 0;
+var s = 100;
+var b = 100;
+
+var cube = document.querySelector("#cube");
+cube.addEventListener("mousedown", cubeOnMouseDown);
+
+var ring = document.querySelector("#ring");
+ring.addEventListener("mousedown", ringOnMouseDown);
+
+function cubeOnMouseDown(event) {
+    // TODO Update panel's hsb
+    window.addEventListener("mouseup", cubeOnMouseUp);
+}
+
+function cubeOnMouseUp(event) {
+    // Get normalized mouse coordinates
+    var [x, y] = normalizeMouseCoordinates(event.clientX, event.clientY, cube.getBoundingClientRect());
+    // Modify according to our specific needs
+    y = 1 - y;
+    // Do shit
+    s = x * 100;
+    b = y * 100;
+    updateHSB();
+    window.removeEventListener("mouseup", cubeOnMouseUp);
+}
+
+function ringOnMouseDown(event) {
+    window.addEventListener("mouseup", ringOnMouseUp);
+}
+
+function ringOnMouseUp(event) {
+    // Get normalized mouse coordinates
+    var [x, y] = normalizeMouseCoordinates(event.clientX, event.clientY, cube.getBoundingClientRect());
+    // Modify according to our specific needs
+    x = 2 * x - 1;
+    y = 1 - 2 * y;
+    // Do shit
+    console.log("RING", x, y);
+    window.removeEventListener("mouseup", ringOnMouseUp);
+}
+
 createPanel();
 
 function photoshopEventCallback(event) {
@@ -46,13 +87,27 @@ function updatePanel() {
     csInterface.evalScript("getForegroundHSB()", function (result) {
         var h, s, b;
         [h, s, b] = JSON.parse(result);
-        updateHue(h);
+        updateHSB(h, s, b);
     });
 }
 
-function updateHue(h) {
-    var hue = document.querySelector("#hue");
+function updateHSB(h, s, b) {
+    var hue = document.querySelector("#hue-cube");
     hue.style.background = `hsl(${h}, 100%, 50%)`;
+
+    var s_ = Math.floor((100 - s) / 100 * 255);
+    var saturation = document.querySelector("#saturation-ring");
+    saturation.style.background = `rgb(${s_}, ${s_}, ${s_})`;
+
+    var b_ = Math.floor(b / 100 * 255);
+    var value = document.querySelector("#value-ring");
+    value.style.background = `rgb(${b_}, ${b_}, ${b_})`;
+}
+
+function normalizeMouseCoordinates(x, y, clientRect) {
+    var mouseX = (x - clientRect.left) / clientRect.width;
+    var mouseY = (y - clientRect.top) / clientRect.height;
+    return [clamp(mouseX, 0, 1), clamp(mouseY, 0, 1)];
 }
 
 // https://stackoverflow.com/a/31851617

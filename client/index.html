@@ -38,10 +38,20 @@
 
         .absolute {
             position: absolute;
+        }
+
+        .fill {
             top: 0;
             left: 0;
             bottom: 0;
             right: 0;
+        }
+
+        .cube {
+            top: 15px;
+            left: 15px;
+            bottom: 15px;
+            right: 15px;
         }
 
         .flex {
@@ -128,16 +138,26 @@
             background: hsl(315, 100%, 50%);
         }
 
+        #saturation-ring {
+            /* background: black; */
+            mix-blend-mode: screen;
+        }
+
+        #value-ring {
+            /* background: white; */
+            mix-blend-mode: multiply;
+        }
+
         #hue {
             background: hsl(45, 100%, 50%);
         }
 
-        #saturation {
+        #saturation-cube {
             background: linear-gradient(to right, rgb(255, 255, 255), rgb(0, 0, 0));
             mix-blend-mode: screen;
         }
 
-        #value {
+        #value-cube {
             background: linear-gradient(to bottom, rgb(255, 255, 255), rgb(0, 0, 0));
             mix-blend-mode: multiply;
         }
@@ -145,26 +165,31 @@
 </head>
 
 <body>
-    <div class="flex column h-100">
-        <div class="flex h-cell">
-            <div class="w-cell" id="hue-135"></div>
-            <div class="w-cube" id="hue-45-135"></div>
-            <div class="w-cell" id="hue-45"></div>
-        </div>
-        <div class="flex h-cube">
-            <div class="w-cell" id="hue-135-225"></div>
-            <div class="w-cube relative" onclick="onClickEventCallback(event)">
-                <div class="absolute pointer-events-none" id="hue"></div>
-                <div class="absolute pointer-events-none" id="saturation"></div>
-                <div class="absolute pointer-events-none" id="value"></div>
+    <div class="absolute fill" id="ring">
+        <div class="absolute fill flex column pointer-events-none" id="hue-ring">
+            <div class="flex h-cell">
+                <div class="w-cell" id="hue-135"></div>
+                <div class="w-cube" id="hue-45-135"></div>
+                <div class="w-cell" id="hue-45"></div>
             </div>
-            <div class="w-cell" id="hue-315-45"></div>
+            <div class="flex h-cube">
+                <div class="w-cell" id="hue-135-225"></div>
+                <div class="w-cube"></div>
+                <div class="w-cell" id="hue-315-45"></div>
+            </div>
+            <div class="flex h-cell">
+                <div class="w-cell" id="hue-225"></div>
+                <div class="w-cube" id="hue-225-315"></div>
+                <div class="w-cell" id="hue-315"></div>
+            </div>
         </div>
-        <div class="flex h-cell">
-            <div class="w-cell" id="hue-225"></div>
-            <div class="w-cube" id="hue-225-315"></div>
-            <div class="w-cell" id="hue-315"></div>
-        </div>
+        <div class="absolute fill pointer-events-none" id="saturation-ring"></div>
+        <div class="absolute fill pointer-events-none" id="value-ring"></div>
+    </div>
+    <div class="absolute cube" id="cube">
+        <div class="absolute fill pointer-events-none" id="hue-cube"></div>
+        <div class="absolute fill pointer-events-none" id="saturation-cube"></div>
+        <div class="absolute fill pointer-events-none" id="value-cube"></div>
     </div>
     <script type="text/javascript" src="CSInterface.js"></script>
     <script type="text/javascript" src="index.js"></script>
