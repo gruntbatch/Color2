@@ -34,10 +34,11 @@ function cubeOnMouseUp(event) {
     var [x, y] = normalizeMouseCoordinates(event.clientX, event.clientY, cube.getBoundingClientRect());
     // Modify according to our specific needs
     y = 1 - y;
-    // Do shit
+    // Update h, s, b
     s = x * 100;
     b = y * 100;
-    updateHSB();
+    updateHSB(h, s, b);
+    setForegroundColor(h, s, b);
     window.removeEventListener("mouseup", cubeOnMouseUp);
 }
 
@@ -51,8 +52,10 @@ function ringOnMouseUp(event) {
     // Modify according to our specific needs
     x = 2 * x - 1;
     y = 1 - 2 * y;
-    // Do shit
-    console.log("RING", x, y);
+    // Update h, s, b
+    h = Math.atan2(y, x) * (180 / Math.PI);
+    updateHSB(h, s, b);
+    setForegroundColor(h, s, b);
     window.removeEventListener("mouseup", ringOnMouseUp);
 }
 
@@ -85,7 +88,6 @@ function createPanel() {
 
 function updatePanel() {
     csInterface.evalScript("getForegroundHSB()", function (result) {
-        var h, s, b;
         [h, s, b] = JSON.parse(result);
         updateHSB(h, s, b);
     });
@@ -94,14 +96,6 @@ function updatePanel() {
 function updateHSB(h, s, b) {
     var hue = document.querySelector("#hue-cube");
     hue.style.background = `hsl(${h}, 100%, 50%)`;
-
-    var s_ = Math.floor((100 - s) / 100 * 255);
-    var saturation = document.querySelector("#saturation-ring");
-    saturation.style.background = `rgb(${s_}, ${s_}, ${s_})`;
-
-    var b_ = Math.floor(b / 100 * 255);
-    var value = document.querySelector("#value-ring");
-    value.style.background = `rgb(${b_}, ${b_}, ${b_})`;
 }
 
 function normalizeMouseCoordinates(x, y, clientRect) {
