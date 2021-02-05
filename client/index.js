@@ -31,15 +31,29 @@ cube.addEventListener("mousedown", cubeOnMouseDown);
 var ring = document.querySelector("#ring");
 ring.addEventListener("mousedown", ringOnMouseDown);
 
+var cubeReticle = document.querySelector("#cube-reticle");
+cubeReticle.addEventListener("mousedown", cubeOnMouseDown);
+
+var hueReticle = document.querySelector("#hue-reticle");
+hueReticle.addEventListener("mousedown", ringOnMouseDown);
+
 function cubeOnMouseDown(event) {
-    // TODO Update panel's hsb
+    mapCubeMouseToHsb(event);
+    updateHSB(h, s, b);
+    window.addEventListener("mousemove", cubeOnMouseMove);
     window.addEventListener("mouseup", cubeOnMouseUp);
+}
+
+function cubeOnMouseMove(event) {
+    mapCubeMouseToHsb(event);
+    updateHSB(h, s, b);
 }
 
 function cubeOnMouseUp(event) {
     mapCubeMouseToHsb(event);
     updateHSB(h, s, b);
     setForegroundColor(h, s, b);
+    window.removeEventListener("mousemove", cubeOnMouseMove);
     window.removeEventListener("mouseup", cubeOnMouseUp);
 }
 
@@ -84,6 +98,44 @@ function updatePanel() {
 function updateHSB(h, s, b) {
     var hue = document.querySelector("#hue-cube");
     hue.style.background = `hsl(${h}, 100%, 50%)`;
+
+    // Set hue-meter
+    const OFFSET = 5;
+    var clientRect = hue.getBoundingClientRect();
+    hueReticle.style.background = `hsl(${h - 180}, 100%, 50%)`;
+    switch (true) {
+        case (h < 45):
+            hueReticle.style.left = `${clientRect.right - OFFSET}px`;
+            var scalar = h / 90 + 0.5;
+            hueReticle.style.top = `${clientRect.bottom - (clientRect.height * scalar) - OFFSET}px`;
+            break;
+        case (h < 135):
+            var scalar = (h - 45) / 90;
+            hueReticle.style.left = `${clientRect.right - (clientRect.width * scalar) - OFFSET}px`;
+            hueReticle.style.top = `${clientRect.top - OFFSET}px`;
+            break;
+        case (h < 225):
+            hueReticle.style.left = `${clientRect.left - OFFSET}px`;
+            var scalar = (h - 135) / 90;
+            hueReticle.style.top = `${clientRect.top + (clientRect.height * scalar) - OFFSET}px`;
+            break;
+        case (h < 315):
+            var scalar = (h - 225) / 90;
+            hueReticle.style.left = `${clientRect.left + (clientRect.width * scalar) - OFFSET}px`;
+            hueReticle.style.top = `${clientRect.bottom - OFFSET}px`;
+            break;
+        default /* (h <= 360) */:
+            hueReticle.style.left = `${clientRect.right - OFFSET}px`;
+            var scalar = (h - 315) / 90;
+            hueReticle.style.top = `${clientRect.bottom - (clientRect.height * scalar) - OFFSET}px`;
+            break;
+    }
+
+    // Set cube-meter
+    cubeReticle.style.background = `hsl(${h}, ${100 - s}%, ${50 - b / 2}%)`;
+    console.log("sb", s / 100, b / 50);
+    cubeReticle.style.left = `${clientRect.left + clientRect.width * (s / 100) - OFFSET}px`;
+    cubeReticle.style.top = `${clientRect.top + clientRect.height * ((100 - b) / 100) - OFFSET}px`;
 }
 
 function mapCubeMouseToHsb(event) {

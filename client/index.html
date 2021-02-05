@@ -161,6 +161,10 @@
             background: linear-gradient(to bottom, rgb(255, 255, 255), rgb(0, 0, 0));
             mix-blend-mode: multiply;
         }
+
+        .reticle {
+            padding: 5px;
+        }
     </style>
 </head>
 
@@ -191,6 +195,8 @@
         <div class="absolute fill pointer-events-none" id="saturation-cube"></div>
         <div class="absolute fill pointer-events-none" id="value-cube"></div>
     </div>
+    <div class="absolute reticle" id="hue-reticle"></div>
+    <div class="absolute reticle" id="cube-reticle"></div>
     <script type="text/javascript" src="CSInterface.js"></script>
     <script type="text/javascript" src="index.js"></script>
 </body>
