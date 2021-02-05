@@ -116,9 +116,29 @@ function nmc_to_sb(x, y) {
 }
 
 function nmc_to_h(x, y) {
-    x = 2 * x - 1;
-    y = 1 - 2 * y;
-    return Math.atan2(y, x) * (180 / Math.PI);
+    var x_ = 2 * x - 1;
+    var y_ = 1 - 2 * y;
+
+    switch (true) {
+        case (0 <= y_ && y_ <= x_):
+            var scalar = y_ / Math.abs(x_);
+            return 45 * scalar;
+        case (x_ <= y_ && -x_ <= y_):
+            var scalar = x_ / Math.abs(y_);
+            scalar = (scalar + 1) / 2;
+            return 45 + 90 * (1 - scalar);
+        case (y_ <= -x_ && -y_ <= -x_):
+            var scalar = y_ / Math.abs(x_);
+            scalar = (scalar + 1) / 2;
+            return 135 + 90 * (1 - scalar);
+        case (-x_ <= -y_ && x_ <= -y_):
+            var scalar = x_ / Math.abs(y_);
+            scalar = (scalar + 1) / 2;
+            return 225 + 90 * scalar;
+        default /* -y_ <= x_ && y_ <= 0 */:
+            var scalar = y_ / Math.abs(x_);
+            return 315 + 45 * (1 + scalar);
+    }
 }
 
 // https://stackoverflow.com/a/31851617
