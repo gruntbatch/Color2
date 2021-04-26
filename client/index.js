@@ -133,7 +133,6 @@ function updateHSB(h, s, b) {
 
     // Set cube-meter
     cubeReticle.style.background = `hsl(${h}, ${100 - s}%, ${50 - b / 2}%)`;
-    console.log("sb", s / 100, b / 50);
     cubeReticle.style.left = `${clientRect.left + clientRect.width * (s / 100) - OFFSET}px`;
     cubeReticle.style.top = `${clientRect.top + clientRect.height * ((100 - b) / 100) - OFFSET}px`;
 }
