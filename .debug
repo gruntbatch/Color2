@@ -1,8 +1,8 @@
 <ExtensionList>
     <Extension Id="com.github.gruntbatch.color2.panel">
         <HostList>
-            <Host Name="PHXS" Port="8088"/>
-            <Host Name="PHSP" Port="8088"/>
+            <Host Name="PHXS" Port="8089"/>
+            <Host Name="PHSP" Port="8089"/>
         </HostList>
     </Extension>
 </ExtensionList>
