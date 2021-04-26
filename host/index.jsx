@@ -6,7 +6,12 @@ function getForegroundHSB() {
 }
 
 function setForegroundHSB(h, s, b) {
-    app.foregroundColor.hsb.hue = h;
-    app.foregroundColor.hsb.saturation = s;
-    app.foregroundColor.hsb.brightness = b;
+    // Create a new color object based on the given hsb values, then
+    // set foregroundColor once, and only once. This prevents multiple
+    // signals being sent back to the client.
+    var color = new SolidColor();
+    color.hsb.hue = h;
+    color.hsb.saturation = s;
+    color.hsb.brightness = b;
+    app.foregroundColor = color;
 }
