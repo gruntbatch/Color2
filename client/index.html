@@ -9,6 +9,7 @@
         * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
 
         body {
@@ -24,11 +25,47 @@
             position: absolute;
         }
 
+        .relative {
+            position: relative;
+        }
+
         .fill {
             top: 0;
             left: 0;
             bottom: 0;
             right: 0;
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .flex-column {
+            flex-direction: column;
+        }
+
+        .h-1 {
+            height: 1rem;
+        }
+
+        .h-2 {
+            height: 2rem;
+        }
+
+        .w-1 {
+            width: 1rem;
+        }
+
+        .border {
+            border: 0.1rem solid white;
+        }
+
+        .w-2 {
+            width: 2rem;
+        }
+
+        .flex-grow {
+            flex-grow: 1;
         }
 
         .cube {
@@ -40,7 +77,6 @@
 
         .reticle {
             border: 0.1rem solid white;
-            box-sizing: border-box;
             padding: 0.4rem;
         }
         
@@ -61,12 +97,21 @@
 </head>
 
 <body>
-    <div class="absolute fill" id="ring">
-    </div>
-    <div class="absolute cube" id="cube">
-        <div class="absolute fill pointer-events-none rounded" id="hue-cube"></div>
-        <div class="absolute fill pointer-events-none rounded" id="saturation-cube"></div>
-        <div class="absolute fill pointer-events-none rounded" id="value-cube"></div>
+    <div class="absolute fill flex flex-column">
+        <div class="relative flex-grow">
+            <div class="absolute fill" id="ring">
+            </div>
+            <div class="absolute cube" id="cube">
+                <div class="absolute fill pointer-events-none rounded" id="hue-cube"></div>
+                <div class="absolute fill pointer-events-none rounded" id="saturation-cube"></div>
+                <div class="absolute fill pointer-events-none rounded" id="value-cube"></div>
+            </div>
+        </div>
+        <div class="h-1 flex">
+            <div class="w-1 border" id="color-a"></div>
+            <div class="flex-grow" id="color-mix"></div>
+            <div class="w-1 border" id="color-b"></div>
+        </div>
     </div>
     <div class="absolute reticle rounded" id="hue-reticle"></div>
     <div class="absolute reticle rounded" id="cube-reticle"></div>

@@ -17,32 +17,45 @@ csInterface.addEventListener(
     photoshopEventCallback);
 
 function register(eventId) {
-    var event = new CSEvent("com.adobe.PhotoshopRegisterEvent", "APPLICATION");
+    let event = new CSEvent("com.adobe.PhotoshopRegisterEvent", "APPLICATION");
     event.extensionId = extensionId;
     event.data = eventId.toString();
     csInterface.dispatchEvent(event);
 }
 
+// All colors are stored in HSB
 let foregroundColor = [0, 0, 0];
 let backgroundColor = [0, 0, 100];
 
-var cube = document.querySelector("#cube");
+let colorA = [0, 0, 0];
+let colorB = [0, 0, 100];
+
+let cube = document.querySelector("#cube");
 let hueCube = document.getElementById("hue-cube");
-var ring = document.querySelector("#ring");
-var cubeReticle = document.querySelector("#cube-reticle");
-var hueReticle = document.querySelector("#hue-reticle");
+let ring = document.querySelector("#ring");
+let cubeReticle = document.querySelector("#cube-reticle");
+let hueReticle = document.querySelector("#hue-reticle");
+
+let colorButtonA = document.getElementById("color-a");
+let colorMix = document.getElementById("color-mix");
+let colorButtonB = document.getElementById("color-b");
 
 buildPanel();
-
-// Update the panel, to initialize the h, s, b values
-updatePanel();
 
 function buildPanel() {
     let degrees = [...Array(360/15).keys()].map(x => x * 15).concat(360);
     let colors = degrees.map(x => `hsl(${360 - x}, 100%, 50%) ${x}deg`).join(", ");
     let background = `conic-gradient(from ${ROTATION}deg, ${colors})`;
     document.getElementById("ring").style.background = background;
+
+    csInterface.evalScript("getForegroundAndBackgroundHSB()", function (result) {
+        [colorA, colorB] = JSON.parse(result);
+        updateColorMix(colorA, colorB);
+    });
 }
+
+// Update the panel, to initialize the h, s, b values
+updatePanel();
 
 // Listen for the Exch, Rset, and setd Photoshop events
 register(EVENT_EXCH);
@@ -60,15 +73,14 @@ cubeReticle.addEventListener("mousedown", cubeOnMouseDown);
 function cubeOnMouseDown(event) {
     mapCubeMouseToHsb(event);
     updateHSB(foregroundColor);
-    // console.log("Hello?");
     window.addEventListener("mousemove", cubeOnMouseMove);
     window.addEventListener("mouseup", cubeOnMouseUp);
 }
 
 function cubeOnMouseUp(event) {
     mapCubeMouseToHsb(event);
-    updateHSB(foregroundColor);
-    setForegroundColor(foregroundColor);
+    // updateHSB(foregroundColor);
+    setForegroundColorHSB(foregroundColor);
     window.removeEventListener("mousemove", cubeOnMouseMove);
     window.removeEventListener("mouseup", cubeOnMouseUp);
 }
@@ -96,15 +108,45 @@ function ringOnMouseMove(event) {
 function ringOnMouseUp(event) {
     mapRingMouseToHsb(event);
     updateHSB(foregroundColor);
-    setForegroundColor(foregroundColor);
+    setForegroundColorHSB(foregroundColor);
     window.removeEventListener("mousemove", ringOnMouseMove);
     window.removeEventListener("mouseup", ringOnMouseUp);
 }
 
+colorButtonA.addEventListener("mousedown", (event) => {
+    colorA = [...foregroundColor];
+    console.log("A", colorA, colorB);
+    updateColorMix(colorA, colorB);
+});
+
+colorButtonB.addEventListener("mousedown", (event) => {
+    colorB = [...foregroundColor];
+    console.log("B", colorA, colorB);
+    updateColorMix(colorA, colorB);
+});
+
+colorMix.addEventListener("mousedown", (event) => {
+    // Map mouse position from 0 to 1
+    mixRect = colorMix.getBoundingClientRect();
+
+    let x = event.clientX;
+    x = (x - mixRect.left - REM) / (mixRect.width - 2.0 * REM);
+    x = clamp(x, 0, 1);
+
+    foregroundColor = rgb_to_hsb(lerpRGB(hsb_to_rgb(colorA), hsb_to_rgb(colorB), x));
+
+    updateHSB(foregroundColor);
+    setForegroundColorHSB(foregroundColor);
+});
+
 window.onresize = _ => updateHSB(foregroundColor);
 
-function setForegroundColor([h, s, b]) {
+function setForegroundColorHSB([h, s, b]) {
     csInterface.evalScript(`setForegroundHSB(${h}, ${s}, ${b})`);
+}
+
+function setForegroundColorRGB([r, g, b]) {
+    csInterface.evalScript
 }
 
 function updatePanel() {
@@ -119,7 +161,6 @@ function thetaToOpposite(theta, adjacent) {
 }
 
 function updateHSB([h, s, b]) {
-    console.log(h, s, b);
     hueCube.style.background = `hsl(${h}, 100%, 50%)`;
 
     // Set hue-meter
@@ -161,9 +202,15 @@ function updateHSB([h, s, b]) {
     // Set cube-meter
     let cubeRect = cube.getBoundingClientRect();
     cubeReticle.style.borderColor = (s < 30 && b > 70) ? "black" : "white";
-    cubeReticle.style.background = `hsl(${h}, ${s}%, ${sb_to_l(s, b)}%)`;
+    cubeReticle.style.background = hsb_to_css_hsl([h, s, b]);
     cubeReticle.style.left = `${(cubeRect.left) + (cubeRect.width - REM) * (s / 100)}px`;
     cubeReticle.style.top = `${(cubeRect.top) + (cubeRect.height - REM) * ((100 - b) / 100)}px`;
+}
+
+function updateColorMix(a, b) {
+    colorButtonA.style.background = hsb_to_css_hsl(a);
+    colorMix.style.background = `linear-gradient(to right, ${hsb_to_css_hsl(a)} 1rem, ${hsb_to_css_hsl(b)} calc(100% - 1rem))`
+    colorButtonB.style.background = hsb_to_css_hsl(b);
 }
 
 function mapCubeMouseToHsb(event) {
@@ -199,7 +246,7 @@ function mapRingMouseToHsb(event) {
 }
 
 // https://stackoverflow.com/a/31851617
-function hsb_to_hsl(h, s, v) {
+function hsb_to_hsl([h, s, v]) {
     return [h, s, sb_to_l(s, v)]
 }
 
@@ -230,6 +277,42 @@ function clamp(num, min, max) {
     return num <= min ? min : num >= max ? max : num;
 }
 
+function lerp(a, b, t) {
+    return a * (1.0 - t) + b * t;
+}
+
+function lerpRGB(a, b, t) {
+    // a = [
+    //     Math.cos(degrees_to_radians(a[0])) * a[1],
+    //     Math.sin(degrees_to_radians(a[0])) * a[1],
+    //     a[2]
+    // ];
+
+    // b = [
+    //     Math.cos(degrees_to_radians(b[0])) * b[1],
+    //     Math.sin(degrees_to_radians(b[0])) * b[1],
+    //     b[2]
+    // ]
+
+    // let c = [
+    //     lerp(a[0], b[0], t),
+    //     lerp(a[1], b[1], t),
+    //     lerp(a[2], b[2], t)
+    // ]
+
+    // return [
+    //     radians_to_degrees(Math.atan2(c[1], c[0])),
+    //     Math.sqrt(c[0] * c[0] + c[1] * c[1]),
+    //     c[0]
+    // ];
+
+    return [
+        lerp(a[0], b[0], t),
+        lerp(a[1], b[1], t),
+        lerp(a[2], b[2], t)
+    ]
+}
+
 function pointToDegrees([x, y]) {
     let d = radians_to_degrees(Math.atan2(y, x));
     return (d < 0) ? 360 + d : d;
@@ -241,4 +324,31 @@ function degrees_to_radians(degrees) {
 
 function radians_to_degrees(radians) {
     return radians * (180.0 / Math.PI);
+}
+
+function hsb_to_css_hsl(hsb) {
+    [h, s, l] = hsb_to_hsl(hsb);
+    return `hsl(${h}, ${s}%, ${l}%)`
+}
+
+function rgb_to_css_rgb([r, g, b]) {
+    return `rgb(${r}, ${g}, ${b})`
+}
+
+// https://www.30secondsofcode.org/js/s/rgb-to-hsb
+function rgb_to_hsb([r, g, b]) {
+    const v = Math.max(r, g, b);
+    const n = v - Math.min(r, g, b);
+    // lol, good luck debugging these heiroglyphics
+    const h = n === 0 ? 0 : n && v === r ? (g - b) / n : v === g ? 2 + (b - r) / n : 4 + (r - g) / n;
+    return [60 * (h < 0 ? h + 6 : h), v && (n / v) * 100, v * 100];
+}
+
+// https://www.30secondsofcode.org/js/s/hsb-to-rgb
+function hsb_to_rgb([h, s, b]) {
+    s /= 100;
+    b /= 100;
+    const k = (n) => (n + h / 60) % 6;
+    const f = (n) => b * (1 - s * Math.max(0, Math.min(k(n), 4 - k(n), 1)));
+    return [f(5), f(3), f(1)];
 }
