@@ -5,8 +5,6 @@ let ROTATION = -90
 let REM = parseFloat(getComputedStyle(document.documentElement).fontSize);
 let HALF_REM = REM * 0.5;
 
-console.log(REM, HALF_REM);
-
 // Establish a line of communication with the host
 var csInterface = new CSInterface();
 var extensionId = csInterface.getExtensionID();
@@ -47,6 +45,8 @@ cubeReticle.addEventListener("mousedown", cubeOnMouseDown);
 
 var hueReticle = document.querySelector("#hue-reticle");
 hueReticle.addEventListener("mousedown", ringOnMouseDown);
+
+window.onresize = _ => updateHSB(h, s, b);
 
 function cubeOnMouseDown(event) {
     mapCubeMouseToHsb(event);
@@ -113,43 +113,47 @@ function updatePanel() {
     });
 }
 
+function thetaToOpposite(theta, adjacent) {
+    return Math.tan(degrees_to_radians(theta)) * adjacent;
+}
+
 function updateHSB(h, s, b) {
     hueCube.style.background = `hsl(${h}, 100%, 50%)`;
 
     // Set hue-meter
+    let ringRect = ring.getBoundingClientRect();
+    let halfWidth = (ringRect.width - REM) / 2.0;
+    let halfHeight = (ringRect.height - REM) / 2.0;
     let x, y;
-    switch (true) {
-    case (h < 45):
-        x = -1;
-        y = -Math.tan(degrees_to_radians(h));
-        break;
-    case (h < 135):
-        x = Math.tan(degrees_to_radians(h - 90));
-        y = -1;
-        break;
-    case (h < 225):
-        x = 1;
-        y = Math.tan(degrees_to_radians(h - 180));
-        break;
-    case (h < 315):
-        x = -Math.tan(degrees_to_radians(h - 270));
-        y = 1;
-        break;
-    default /* (h <= 360) */:
-        x = -1;
-        y = -Math.tan(degrees_to_radians(h));
-        break;
+    
+    if (h < 90 || 270 < h) {
+        x = -halfWidth;
+        y = thetaToOpposite(h, halfWidth);
+        if (y < -halfHeight) {
+            x = -thetaToOpposite(h - 90, halfHeight);
+            y = -halfHeight;
+        } else if (halfHeight < y) {
+            x = thetaToOpposite(h + 90, halfHeight);
+            y = halfHeight;
+        }
+    } else {
+        x = halfWidth;
+        y = -thetaToOpposite(h - 180, halfWidth);
+        if (y < -halfHeight) {
+            x = -thetaToOpposite(h - 90, halfHeight);
+            y = -halfHeight;
+        } else if (halfHeight < y) {
+            x = thetaToOpposite(h + 270, halfHeight);
+            y = halfHeight;
+        }
     }
 
-    x = (1.0 + x) / 2.0;
-    y = (1.0 - y) / 2.0;
-    
-    console.log(x, y);
+    x = x + halfWidth;
+    y = y + halfHeight;
 
-    let ringRect = ring.getBoundingClientRect();
     hueReticle.style.background = `hsl(${h}, 100%, 50%)`;
-    hueReticle.style.left = `${ringRect.left + (ringRect.width - REM) * x}px`;
-    hueReticle.style.top = `${ringRect.top + (ringRect.height - REM) * y}px`;
+    hueReticle.style.left = `${ringRect.left + x}px`;
+    hueReticle.style.top = `${ringRect.top + y}px`;
     
     // Set cube-meter
     let cubeRect = cube.getBoundingClientRect();
