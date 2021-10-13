@@ -20,22 +20,6 @@
             pointer-events: none;
         }
 
-        .float-left {
-            float: left;
-        }
-
-        .h-100 {
-            height: 100%;
-        }
-
-        .w-100 {
-            width: 100%;
-        }
-
-        .relative {
-            position: relative;
-        }
-
         .absolute {
             position: absolute;
         }
@@ -54,153 +38,38 @@
             right: 1rem;
         }
 
-        .flex {
-            display: flex;
+        .reticle {
+            border: 0.1rem solid white;
+            box-sizing: border-box;
+            padding: 0.4rem;
         }
-
-        .column {
-            flex-direction: column;
-        }
-
-        .h-cell {
-            flex-grow: 0;
-            min-height: 1rem;
-        }
-
-        .w-cell {
-            flex-grow: 0;
-            min-width: 1rem;
-        }
-
-        .h-cube {
-            flex-grow: 1;
-            min-height: 90px;
-        }
-
-        .w-cube {
-            flex-grow: 1;
-            min-width: 90px;
-        }
-
-        #hue-315-45 {
-            background: linear-gradient(to top,
-                    hsl(315, 100%, 50%),
-                    hsl(330, 100%, 50%),
-                    hsl(345, 100%, 50%),
-                    hsl(0, 100%, 50%),
-                    hsl(15, 100%, 50%),
-                    hsl(30, 100%, 50%),
-                    hsl(45, 100%, 50%));
-        }
-
-        #hue-45 {
-            background: hsl(45, 100%, 50%);
-        }
-
-        #hue-45-135 {
-            background: linear-gradient(to left,
-                    hsl(45, 100%, 50%),
-                    hsl(60, 100%, 50%),
-                    hsl(75, 100%, 50%),
-                    hsl(90, 100%, 50%),
-                    hsl(105, 100%, 50%),
-                    hsl(120, 100%, 50%),
-                    hsl(135, 100%, 50%));
-        }
-
-        #hue-135 {
-            background: hsl(135, 100%, 50%);
-        }
-
-        #hue-135-225 {
-            background: linear-gradient(to bottom,
-                    hsl(135, 100%, 50%),
-                    hsl(150, 100%, 50%),
-                    hsl(165, 100%, 50%),
-                    hsl(180, 100%, 50%),
-                    hsl(195, 100%, 50%),
-                    hsl(210, 100%, 50%),
-                    hsl(225, 100%, 50%));
-        }
-
-        #hue-225 {
-            background: hsl(225, 100%, 50%);
-        }
-
-        #hue-225-315 {
-            background: linear-gradient(to right,
-                    hsl(225, 100%, 50%),
-                    hsl(240, 100%, 50%),
-                    hsl(255, 100%, 50%),
-                    hsl(270, 100%, 50%),
-                    hsl(285, 100%, 50%),
-                    hsl(300, 100%, 50%),
-                    hsl(315, 100%, 50%));
-        }
-
-        #hue-315 {
-            background: hsl(315, 100%, 50%);
-        }
-
-        #saturation-ring {
-            /* background: black; */
-            mix-blend-mode: screen;
-        }
-
-        #value-ring {
-            /* background: white; */
-            mix-blend-mode: multiply;
-        }
-
-        #hue {
-            background: hsl(45, 100%, 50%);
+        
+        .rounded {
+            border-radius: 0.5rem;
         }
 
         #saturation-cube {
-            background: linear-gradient(to right, rgb(255, 255, 255), rgb(0, 0, 0));
+            background: linear-gradient(to right, rgb(255, 255, 255) 0 0.5rem, rgb(0, 0, 0) calc(100% - 0.5rem) 100%);
             mix-blend-mode: screen;
         }
-
+        
         #value-cube {
-            background: linear-gradient(to bottom, rgb(255, 255, 255), rgb(0, 0, 0));
+            background: linear-gradient(to bottom, rgb(255, 255, 255) 0 0.5rem, rgb(0, 0, 0) calc(100% - 0.5rem) 100%);
             mix-blend-mode: multiply;
-        }
-
-        .reticle {
-            padding: 5px;
         }
     </style>
 </head>
 
 <body>
     <div class="absolute fill" id="ring">
-        <div class="absolute fill flex column pointer-events-none" id="hue-ring">
-            <div class="flex h-cell">
-                <div class="w-cell" id="hue-135"></div>
-                <div class="w-cube" id="hue-45-135"></div>
-                <div class="w-cell" id="hue-45"></div>
-            </div>
-            <div class="flex h-cube">
-                <div class="w-cell" id="hue-135-225"></div>
-                <div class="w-cube"></div>
-                <div class="w-cell" id="hue-315-45"></div>
-            </div>
-            <div class="flex h-cell">
-                <div class="w-cell" id="hue-225"></div>
-                <div class="w-cube" id="hue-225-315"></div>
-                <div class="w-cell" id="hue-315"></div>
-            </div>
-        </div>
-        <div class="absolute fill pointer-events-none" id="saturation-ring"></div>
-        <div class="absolute fill pointer-events-none" id="value-ring"></div>
     </div>
     <div class="absolute cube" id="cube">
-        <div class="absolute fill pointer-events-none" id="hue-cube"></div>
-        <div class="absolute fill pointer-events-none" id="saturation-cube"></div>
-        <div class="absolute fill pointer-events-none" id="value-cube"></div>
+        <div class="absolute fill pointer-events-none rounded" id="hue-cube"></div>
+        <div class="absolute fill pointer-events-none rounded" id="saturation-cube"></div>
+        <div class="absolute fill pointer-events-none rounded" id="value-cube"></div>
     </div>
-    <div class="absolute reticle" id="hue-reticle"></div>
-    <div class="absolute reticle" id="cube-reticle"></div>
+    <div class="absolute reticle rounded" id="hue-reticle"></div>
+    <div class="absolute reticle rounded" id="cube-reticle"></div>
     <script type="text/javascript" src="CSInterface.js"></script>
     <script type="text/javascript" src="index.js"></script>
 </body>

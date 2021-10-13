@@ -1,5 +1,12 @@
 /** Copyright (C) 2021  Peter Gregory */
 
+let ROTATION = -90
+
+let REM = parseFloat(getComputedStyle(document.documentElement).fontSize);
+let HALF_REM = REM * 0.5;
+
+console.log(REM, HALF_REM);
+
 // Establish a line of communication with the host
 var csInterface = new CSInterface();
 var extensionId = csInterface.getExtensionID();
@@ -18,6 +25,8 @@ var h = 0;
 var s = 100;
 var b = 100;
 
+buildPanel();
+
 // Update the panel, to initialize the h, s, b values
 updatePanel();
 
@@ -30,6 +39,8 @@ cube.addEventListener("mousedown", cubeOnMouseDown);
 
 var ring = document.querySelector("#ring");
 ring.addEventListener("mousedown", ringOnMouseDown);
+
+let hueCube = document.getElementById("hue-cube");
 
 var cubeReticle = document.querySelector("#cube-reticle");
 cubeReticle.addEventListener("mousedown", cubeOnMouseDown);
@@ -88,6 +99,13 @@ function setForegroundColor(h, s, b) {
     csInterface.evalScript(`setForegroundHSB(${h}, ${s}, ${b})`);
 }
 
+function buildPanel() {
+    let degrees = [...Array(360/15).keys()].map(x => x * 15).concat(360);
+    let colors = degrees.map(x => `hsl(${360 - x}, 100%, 50%) ${x}deg`).join(", ");
+    let background = `conic-gradient(from ${ROTATION}deg, ${colors})`;
+    document.getElementById("ring").style.background = background;
+}
+
 function updatePanel() {
     csInterface.evalScript("getForegroundHSB()", function (result) {
         [h, s, b] = JSON.parse(result);
@@ -96,106 +114,96 @@ function updatePanel() {
 }
 
 function updateHSB(h, s, b) {
-    var hue = document.querySelector("#hue-cube");
-    hue.style.background = `hsl(${h}, 100%, 50%)`;
+    hueCube.style.background = `hsl(${h}, 100%, 50%)`;
 
     // Set hue-meter
-    const OFFSET = 5;
-    var clientRect = hue.getBoundingClientRect();
-    hueReticle.style.background = `hsl(${h - 180}, 100%, 50%)`;
+    let x, y;
     switch (true) {
-        case (h < 45):
-            hueReticle.style.left = `${clientRect.right - OFFSET}px`;
-            var scalar = h / 90 + 0.5;
-            hueReticle.style.top = `${clientRect.bottom - (clientRect.height * scalar) - OFFSET}px`;
-            break;
-        case (h < 135):
-            var scalar = (h - 45) / 90;
-            hueReticle.style.left = `${clientRect.right - (clientRect.width * scalar) - OFFSET}px`;
-            hueReticle.style.top = `${clientRect.top - OFFSET}px`;
-            break;
-        case (h < 225):
-            hueReticle.style.left = `${clientRect.left - OFFSET}px`;
-            var scalar = (h - 135) / 90;
-            hueReticle.style.top = `${clientRect.top + (clientRect.height * scalar) - OFFSET}px`;
-            break;
-        case (h < 315):
-            var scalar = (h - 225) / 90;
-            hueReticle.style.left = `${clientRect.left + (clientRect.width * scalar) - OFFSET}px`;
-            hueReticle.style.top = `${clientRect.bottom - OFFSET}px`;
-            break;
-        default /* (h <= 360) */:
-            hueReticle.style.left = `${clientRect.right - OFFSET}px`;
-            var scalar = (h - 315) / 90;
-            hueReticle.style.top = `${clientRect.bottom - (clientRect.height * scalar) - OFFSET}px`;
-            break;
+    case (h < 45):
+        x = -1;
+        y = -Math.tan(degrees_to_radians(h));
+        break;
+    case (h < 135):
+        x = Math.tan(degrees_to_radians(h - 90));
+        y = -1;
+        break;
+    case (h < 225):
+        x = 1;
+        y = Math.tan(degrees_to_radians(h - 180));
+        break;
+    case (h < 315):
+        x = -Math.tan(degrees_to_radians(h - 270));
+        y = 1;
+        break;
+    default /* (h <= 360) */:
+        x = -1;
+        y = -Math.tan(degrees_to_radians(h));
+        break;
     }
 
+    x = (1.0 + x) / 2.0;
+    y = (1.0 - y) / 2.0;
+    
+    console.log(x, y);
+
+    let ringRect = ring.getBoundingClientRect();
+    hueReticle.style.background = `hsl(${h}, 100%, 50%)`;
+    hueReticle.style.left = `${ringRect.left + (ringRect.width - REM) * x}px`;
+    hueReticle.style.top = `${ringRect.top + (ringRect.height - REM) * y}px`;
+    
     // Set cube-meter
-    cubeReticle.style.background = `hsl(${h}, ${100 - s}%, ${50 - b / 2}%)`;
-    cubeReticle.style.left = `${clientRect.left + clientRect.width * (s / 100) - OFFSET}px`;
-    cubeReticle.style.top = `${clientRect.top + clientRect.height * ((100 - b) / 100) - OFFSET}px`;
+    let cubeRect = cube.getBoundingClientRect();
+    if (s < 30 && b > 70) {
+        cubeReticle.style.borderColor = "black";
+    } else {
+        cubeReticle.style.borderColor = "white";
+    }
+    cubeReticle.style.background = `hsl(${h}, ${s}%, ${sb_to_l(s, b)}%)`;
+    cubeReticle.style.left = `${(cubeRect.left) + (cubeRect.width - REM) * (s / 100)}px`;
+    cubeReticle.style.top = `${(cubeRect.top) + (cubeRect.height - REM) * ((100 - b) / 100)}px`;
 }
 
 function mapCubeMouseToHsb(event) {
     // Get normalized mouse coordinates
-    var [x, y] = normalizeMouseCoordinates(event.clientX, event.clientY, cube);
-    // Update h, s, b
-    [s, b] = nmc_to_sb(x, y);
+    let cubeRect = cube.getBoundingClientRect();
+    
+    let x = event.clientX;
+    x = (x - cubeRect.left - HALF_REM) / (cubeRect.width - REM);
+    x = clamp(x, 0, 1);
+    
+    let y = event.clientY;
+    y = (y - cubeRect.top - HALF_REM) / (cubeRect.height - REM);
+    y = clamp(y, 0, 1);
+    y = 1 - y;
+    
+    // Update s, b
+    s = x * 100;
+    b = y * 100;
 }
 
 function mapRingMouseToHsb(event) {
-    // Get normalized mouse coordinates
-    // Note, because the corners of the ring are single solid colors, it is
-    // more accurate to use the inner edge of the ring (the cube) to calculate
-    // client coordinates than the outer edge of the ring.
-    var [x, y] = normalizeMouseCoordinates(event.clientX, event.clientY, cube);
-    // Update h, s, b
-    h = nmc_to_h(x, y);
-}
+    // Get transposed mouse coordinates
+    let ringRect = ring.getBoundingClientRect();
 
-function normalizeMouseCoordinates(x, y, client) {
-    var clientRect = client.getBoundingClientRect();
-    var mouseX = (x - clientRect.left) / clientRect.width;
-    var mouseY = (y - clientRect.top) / clientRect.height;
-    return [clamp(mouseX, 0, 1), clamp(mouseY, 0, 1)];
-}
+    let x = event.clientX;
+    x = (x - ringRect.left - HALF_REM) - (ringRect.width - REM) /  2.0;
 
-function nmc_to_sb(x, y) {
-    y = 1 - y;
-    return [x * 100, y * 100];
-}
+    let y = event.clientY;
+    y = (y - ringRect.top - HALF_REM) - (ringRect.height - REM) / 2.0;
 
-function nmc_to_h(x, y) {
-    var x_ = 2 * x - 1;
-    var y_ = 1 - 2 * y;
-
-    switch (true) {
-        case (0 <= y_ && y_ <= x_):
-            var scalar = y_ / Math.abs(x_);
-            return 45 * scalar;
-        case (x_ <= y_ && -x_ <= y_):
-            var scalar = x_ / Math.abs(y_);
-            scalar = (scalar + 1) / 2;
-            return 45 + 90 * (1 - scalar);
-        case (y_ <= -x_ && -y_ <= -x_):
-            var scalar = y_ / Math.abs(x_);
-            scalar = (scalar + 1) / 2;
-            return 135 + 90 * (1 - scalar);
-        case (-x_ <= -y_ && x_ <= -y_):
-            var scalar = x_ / Math.abs(y_);
-            scalar = (scalar + 1) / 2;
-            return 225 + 90 * scalar;
-        default /* -y_ <= x_ && y_ <= 0 */:
-            var scalar = y_ / Math.abs(x_);
-            return 315 + 45 * (1 + scalar);
-    }
+    // Convert mouse coordinates to h
+    h = pointToDegrees([-x, y]);
 }
 
 // https://stackoverflow.com/a/31851617
 function hsb_to_hsl(h, s, v) {
+    return [h, s, sb_to_l(s, v)]
+}
+
+function sb_to_l(s, v) {
     s = s / 100;
     v = v / 100;
+
     // both hsv and hsl values are in [0, 1]
     var l = (2 - s) * v / 2;
 
@@ -209,7 +217,7 @@ function hsb_to_hsl(h, s, v) {
         }
     }
 
-    return [h, s * 100, l * 100]
+    return l * 100;
 }
 
 // Is it easier to find a clamp function on so than to write your own?
@@ -217,4 +225,17 @@ function hsb_to_hsl(h, s, v) {
 // https://stackoverflow.com/a/11410079
 function clamp(num, min, max) {
     return num <= min ? min : num >= max ? max : num;
+}
+
+function pointToDegrees([x, y]) {
+    let d = radians_to_degrees(Math.atan2(y, x));
+    return (d < 0) ? 360 + d : d;
+}
+
+function degrees_to_radians(degrees) {
+    return degrees * (Math.PI / 180.0);
+}
+
+function radians_to_degrees(radians) {
+    return radians * (180.0 / Math.PI);
 }
