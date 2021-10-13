@@ -204,8 +204,10 @@ function updateSaturationBrightness([h, s, b]) {
 }
 
 function updateMix(a, b) {
+    colorButtonA.style.borderColor = (a[1] < 30 && a[2] > 70) ? "black" : "white";
     colorButtonA.style.background = hsb_to_css_hsl(a);
     colorMix.style.background = `linear-gradient(to right, ${hsb_to_css_hsl(a)} 1rem, ${hsb_to_css_hsl(b)} calc(100% - 1rem))`
+    colorButtonB.style.borderColor = (b[1] < 30 && b[2] > 70) ? "black" : "white";
     colorButtonB.style.background = hsb_to_css_hsl(b);
 }
 
