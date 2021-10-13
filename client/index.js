@@ -151,17 +151,14 @@ function updateHSB(h, s, b) {
     x = x + halfWidth;
     y = y + halfHeight;
 
+    hueReticle.style.borderColor = (50 < h && h < 85) ? "black" : "white";
     hueReticle.style.background = `hsl(${h}, 100%, 50%)`;
     hueReticle.style.left = `${ringRect.left + x}px`;
     hueReticle.style.top = `${ringRect.top + y}px`;
     
     // Set cube-meter
     let cubeRect = cube.getBoundingClientRect();
-    if (s < 30 && b > 70) {
-        cubeReticle.style.borderColor = "black";
-    } else {
-        cubeReticle.style.borderColor = "white";
-    }
+    cubeReticle.style.borderColor = (s < 30 && b > 70) ? "black" : "white";
     cubeReticle.style.background = `hsl(${h}, ${s}%, ${sb_to_l(s, b)}%)`;
     cubeReticle.style.left = `${(cubeRect.left) + (cubeRect.width - REM) * (s / 100)}px`;
     cubeReticle.style.top = `${(cubeRect.top) + (cubeRect.height - REM) * ((100 - b) / 100)}px`;
