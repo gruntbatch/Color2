@@ -99,13 +99,10 @@
 <body>
     <div class="absolute fill flex flex-column">
         <div class="relative flex-grow">
-            <div class="absolute fill" id="ring">
-            </div>
-            <div class="absolute cube" id="cube">
-                <div class="absolute fill pointer-events-none rounded" id="hue-cube"></div>
-                <div class="absolute fill pointer-events-none rounded" id="saturation-cube"></div>
-                <div class="absolute fill pointer-events-none rounded" id="value-cube"></div>
-            </div>
+            <div class="absolute fill" id="hue-ring"></div>
+            <div class="absolute cube rounded" id="hue-cube"></div>
+            <div class="absolute cube pointer-events-none rounded" id="saturation-cube"></div>
+            <div class="absolute cube pointer-events-none rounded" id="value-cube"></div>
         </div>
         <div class="h-1 flex">
             <div class="w-1 border" id="color-a"></div>
@@ -113,7 +110,7 @@
             <div class="w-1 border" id="color-b"></div>
         </div>
     </div>
-    <div class="absolute pointer-events-none reticle rounded" id="hue-reticle"></div>
+    <div class="absolute pointer-events-none reticle rounded" id="ring-reticle"></div>
     <div class="absolute pointer-events-none reticle rounded" id="cube-reticle"></div>
     <script type="text/javascript" src="CSInterface.js"></script>
     <script type="text/javascript" src="index.js"></script>
