@@ -141,6 +141,13 @@ colorMix.onmousedown = event => {
     };
 };
 
+[0, 25, 50, 75, 100].map(x => {
+    document.getElementById(`white-${x}`).onmousedown = _ => {
+        foregroundColor = [foregroundColor[0], 0, x];
+        setForegroundColorHSB(foregroundColor);
+    };
+});
+
 window.onresize = _ => {
     updateHue(foregroundColor);
     updateSaturationBrightness(foregroundColor);
