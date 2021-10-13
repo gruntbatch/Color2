@@ -67,65 +67,43 @@ function photoshopEventCallback(event) {
 }
 
 // Listen for canvas events
-cube.addEventListener("mousedown", cubeOnMouseDown);
-cubeReticle.addEventListener("mousedown", cubeOnMouseDown);
+cube.onmousedown = _ => {
+    window.onmousemove = event => {
+        mapCubeMouseToHsb(event);
+        updateHSB(foregroundColor);
+    };
+    window.onmouseup = event => {
+        mapCubeMouseToHsb(event);
+        setForegroundColorHSB(foregroundColor);
+        window.onmousemove = null;
+        window.onmouseup = null;
+    };
+};
 
-function cubeOnMouseDown(event) {
-    mapCubeMouseToHsb(event);
-    updateHSB(foregroundColor);
-    window.addEventListener("mousemove", cubeOnMouseMove);
-    window.addEventListener("mouseup", cubeOnMouseUp);
-}
+ring.onmousedown = _ => {
+    window.onmousemove = event => {
+        mapRingMouseToHsb(event);
+        updateHSB(foregroundColor);
+    };
+    window.onmouseup = event => {
+        mapRingMouseToHsb(event);
+        setForegroundColorHSB(foregroundColor);
+        window.onmousemove = null;
+        window.onmouseup = null;
+    };
+};
 
-function cubeOnMouseUp(event) {
-    mapCubeMouseToHsb(event);
-    // updateHSB(foregroundColor);
-    setForegroundColorHSB(foregroundColor);
-    window.removeEventListener("mousemove", cubeOnMouseMove);
-    window.removeEventListener("mouseup", cubeOnMouseUp);
-}
-
-function cubeOnMouseMove(event) {
-    mapCubeMouseToHsb(event);
-    updateHSB(foregroundColor);
-}
-
-ring.addEventListener("mousedown", ringOnMouseDown);
-hueReticle.addEventListener("mousedown", ringOnMouseDown);
-
-function ringOnMouseDown(event) {
-    mapRingMouseToHsb(event);
-    updateHSB(foregroundColor);
-    window.addEventListener("mousemove", ringOnMouseMove);
-    window.addEventListener("mouseup", ringOnMouseUp);
-}
-
-function ringOnMouseMove(event) {
-    mapRingMouseToHsb(event);
-    updateHSB(foregroundColor);
-}
-
-function ringOnMouseUp(event) {
-    mapRingMouseToHsb(event);
-    updateHSB(foregroundColor);
-    setForegroundColorHSB(foregroundColor);
-    window.removeEventListener("mousemove", ringOnMouseMove);
-    window.removeEventListener("mouseup", ringOnMouseUp);
-}
-
-colorButtonA.addEventListener("mousedown", (event) => {
+colorButtonA.onmousedown = _ => {
     colorA = [...foregroundColor];
-    console.log("A", colorA, colorB);
     updateColorMix(colorA, colorB);
-});
+};
 
-colorButtonB.addEventListener("mousedown", (event) => {
+colorButtonB.onmousedown = _ => {
     colorB = [...foregroundColor];
-    console.log("B", colorA, colorB);
     updateColorMix(colorA, colorB);
-});
+};
 
-colorMix.addEventListener("mousedown", (event) => {
+colorMix.onmousedown = event => {
     // Map mouse position from 0 to 1
     mixRect = colorMix.getBoundingClientRect();
 
@@ -137,7 +115,7 @@ colorMix.addEventListener("mousedown", (event) => {
 
     updateHSB(foregroundColor);
     setForegroundColorHSB(foregroundColor);
-});
+};
 
 window.onresize = _ => updateHSB(foregroundColor);
 
