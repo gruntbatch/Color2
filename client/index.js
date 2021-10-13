@@ -1,92 +1,20 @@
 /** Copyright (C) 2021  Peter Gregory */
 
-let ROTATION = -90
+let EVENT_EXCH = 1165517672; // "Exch"
+let EVENT_RSET = 1383294324; // "Rset"
+let EVENT_SETD = 1936028772; // "setd"
+
+let ROTATION = -90;
 
 let REM = parseFloat(getComputedStyle(document.documentElement).fontSize);
 let HALF_REM = REM * 0.5;
 
 // Establish a line of communication with the host
-var csInterface = new CSInterface();
-var extensionId = csInterface.getExtensionID();
+let csInterface = new CSInterface();
+let extensionId = csInterface.getExtensionID();
 csInterface.addEventListener(
     "com.adobe.PhotoshopJSONCallback" + extensionId,
     photoshopEventCallback);
-
-var eventExch = 1165517672; // "Exch"
-var eventRset = 1383294324; // "Rset"
-var eventSetd = 1936028772; // "setd"
-register(eventExch);
-register(eventSetd);
-register(eventRset);
-
-var h = 0;
-var s = 100;
-var b = 100;
-
-buildPanel();
-
-// Update the panel, to initialize the h, s, b values
-updatePanel();
-
-function photoshopEventCallback(event) {
-    updatePanel();
-}
-
-var cube = document.querySelector("#cube");
-cube.addEventListener("mousedown", cubeOnMouseDown);
-
-var ring = document.querySelector("#ring");
-ring.addEventListener("mousedown", ringOnMouseDown);
-
-let hueCube = document.getElementById("hue-cube");
-
-var cubeReticle = document.querySelector("#cube-reticle");
-cubeReticle.addEventListener("mousedown", cubeOnMouseDown);
-
-var hueReticle = document.querySelector("#hue-reticle");
-hueReticle.addEventListener("mousedown", ringOnMouseDown);
-
-window.onresize = _ => updateHSB(h, s, b);
-
-function cubeOnMouseDown(event) {
-    mapCubeMouseToHsb(event);
-    updateHSB(h, s, b);
-    window.addEventListener("mousemove", cubeOnMouseMove);
-    window.addEventListener("mouseup", cubeOnMouseUp);
-}
-
-function cubeOnMouseMove(event) {
-    mapCubeMouseToHsb(event);
-    updateHSB(h, s, b);
-}
-
-function cubeOnMouseUp(event) {
-    mapCubeMouseToHsb(event);
-    updateHSB(h, s, b);
-    setForegroundColor(h, s, b);
-    window.removeEventListener("mousemove", cubeOnMouseMove);
-    window.removeEventListener("mouseup", cubeOnMouseUp);
-}
-
-function ringOnMouseDown(event) {
-    mapRingMouseToHsb(event);
-    updateHSB(h, s, b);
-    window.addEventListener("mousemove", ringOnMouseMove);
-    window.addEventListener("mouseup", ringOnMouseUp);
-}
-
-function ringOnMouseMove(event) {
-    mapRingMouseToHsb(event);
-    updateHSB(h, s, b);
-}
-
-function ringOnMouseUp(event) {
-    mapRingMouseToHsb(event);
-    updateHSB(h, s, b);
-    setForegroundColor(h, s, b);
-    window.removeEventListener("mousemove", ringOnMouseMove);
-    window.removeEventListener("mouseup", ringOnMouseUp);
-}
 
 function register(eventId) {
     var event = new CSEvent("com.adobe.PhotoshopRegisterEvent", "APPLICATION");
@@ -95,9 +23,19 @@ function register(eventId) {
     csInterface.dispatchEvent(event);
 }
 
-function setForegroundColor(h, s, b) {
-    csInterface.evalScript(`setForegroundHSB(${h}, ${s}, ${b})`);
-}
+let foregroundColor = [0, 0, 0];
+let backgroundColor = [0, 0, 100];
+
+var cube = document.querySelector("#cube");
+let hueCube = document.getElementById("hue-cube");
+var ring = document.querySelector("#ring");
+var cubeReticle = document.querySelector("#cube-reticle");
+var hueReticle = document.querySelector("#hue-reticle");
+
+buildPanel();
+
+// Update the panel, to initialize the h, s, b values
+updatePanel();
 
 function buildPanel() {
     let degrees = [...Array(360/15).keys()].map(x => x * 15).concat(360);
@@ -106,10 +44,73 @@ function buildPanel() {
     document.getElementById("ring").style.background = background;
 }
 
+// Listen for the Exch, Rset, and setd Photoshop events
+register(EVENT_EXCH);
+register(EVENT_RSET);
+register(EVENT_SETD);
+
+function photoshopEventCallback(event) {
+    updatePanel();
+}
+
+// Listen for canvas events
+cube.addEventListener("mousedown", cubeOnMouseDown);
+cubeReticle.addEventListener("mousedown", cubeOnMouseDown);
+
+function cubeOnMouseDown(event) {
+    mapCubeMouseToHsb(event);
+    updateHSB(foregroundColor);
+    // console.log("Hello?");
+    window.addEventListener("mousemove", cubeOnMouseMove);
+    window.addEventListener("mouseup", cubeOnMouseUp);
+}
+
+function cubeOnMouseUp(event) {
+    mapCubeMouseToHsb(event);
+    updateHSB(foregroundColor);
+    setForegroundColor(foregroundColor);
+    window.removeEventListener("mousemove", cubeOnMouseMove);
+    window.removeEventListener("mouseup", cubeOnMouseUp);
+}
+
+function cubeOnMouseMove(event) {
+    mapCubeMouseToHsb(event);
+    updateHSB(foregroundColor);
+}
+
+ring.addEventListener("mousedown", ringOnMouseDown);
+hueReticle.addEventListener("mousedown", ringOnMouseDown);
+
+function ringOnMouseDown(event) {
+    mapRingMouseToHsb(event);
+    updateHSB(foregroundColor);
+    window.addEventListener("mousemove", ringOnMouseMove);
+    window.addEventListener("mouseup", ringOnMouseUp);
+}
+
+function ringOnMouseMove(event) {
+    mapRingMouseToHsb(event);
+    updateHSB(foregroundColor);
+}
+
+function ringOnMouseUp(event) {
+    mapRingMouseToHsb(event);
+    updateHSB(foregroundColor);
+    setForegroundColor(foregroundColor);
+    window.removeEventListener("mousemove", ringOnMouseMove);
+    window.removeEventListener("mouseup", ringOnMouseUp);
+}
+
+window.onresize = _ => updateHSB(foregroundColor);
+
+function setForegroundColor([h, s, b]) {
+    csInterface.evalScript(`setForegroundHSB(${h}, ${s}, ${b})`);
+}
+
 function updatePanel() {
     csInterface.evalScript("getForegroundHSB()", function (result) {
-        [h, s, b] = JSON.parse(result);
-        updateHSB(h, s, b);
+        foregroundColor = JSON.parse(result);
+        updateHSB(foregroundColor);
     });
 }
 
@@ -117,7 +118,8 @@ function thetaToOpposite(theta, adjacent) {
     return Math.tan(degrees_to_radians(theta)) * adjacent;
 }
 
-function updateHSB(h, s, b) {
+function updateHSB([h, s, b]) {
+    console.log(h, s, b);
     hueCube.style.background = `hsl(${h}, 100%, 50%)`;
 
     // Set hue-meter
@@ -178,8 +180,8 @@ function mapCubeMouseToHsb(event) {
     y = 1 - y;
     
     // Update s, b
-    s = x * 100;
-    b = y * 100;
+    foregroundColor[1] = x * 100;
+    foregroundColor[2] = y * 100;
 }
 
 function mapRingMouseToHsb(event) {
@@ -193,7 +195,7 @@ function mapRingMouseToHsb(event) {
     y = (y - ringRect.top - HALF_REM) - (ringRect.height - REM) / 2.0;
 
     // Convert mouse coordinates to h
-    h = pointToDegrees([-x, y]);
+    foregroundColor[0] = pointToDegrees([-x, y]);
 }
 
 // https://stackoverflow.com/a/31851617
