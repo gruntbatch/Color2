@@ -8,6 +8,10 @@ The two-color mixer beneath the hue-cube makes it easy to blend between two colo
 
 Color2 also features a value palette, including a neutral gray, which is useful for laying down base values on an `overlay` layer.
 
+Want more color selection tools? [Check out Color2's companion project, Kelvin.](https://github.com/gruntbatch/Kelvin)
+
+[Contribute a coffee to the Color2 development fund.](https://ko-fi.com/L3L36L4P0)
+
 ## Installation
 
 This has only been tested in Photoshop 2021. It _should_ work in Photoshop 2020, and it _might_ work in Photoshop 2019, but I don't support either of those.
