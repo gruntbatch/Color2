@@ -16,13 +16,13 @@ Want more color selection tools? [Check out Color2's companion project, Kelvin.]
 
 This has only been tested in Photoshop 2021. It _should_ work in Photoshop 2020, and it _might_ work in Photoshop 2019, but I don't support either of those.
 
+Download the [lastest `Color2.zxp` file](https://github.com/gruntbatch/Color2/releases/tag/v1.0.0) from the releases page. It is signed with a self-signed certification, so it _should_ install without issue, but it might raise a warning. You can install the `.zxp` file manually, or using your preferred ZXP manager.
+
 I recommend enabling Photoshop's debug mode, and then cloning this repository into your `Adobe/CEP/extensions` folder. See:
 
 [Where to plonk my Adobe extensions?](https://creative-scripts.com/where-to-plonk-my-extensions/)
 
 [Setting Cep Debug Mode and Log Level the Easy Way](https://creative-scripts.com/setting-cep-debug-and-log-level/)
-
-Alternatively, download the lastest `Color2.zxp` file from the releases page. It is signed with a self-signed certification, so it _should_ install without issue, but it might raise a warning. You can install the `.zxp` file manually, or using your preferred ZXP manager.
 
 ## Inspiration
 
